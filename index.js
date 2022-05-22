@@ -1,9 +1,9 @@
 const Web3 = require("web3");
 const fs = require("fs");
 const web3 = new Web3("https://bsc-dataseed.binance.org");
-const web3Ether = new Web3(
-  "https://mainnet.infura.io/v3/afa9553623db44b388348836b654f819"
-);
+// const web3Ether = new Web3(
+//   "https://mainnet.infura.io/v3/afa9553623db44b388348836b654f819"
+// );
 
 const genRanHex = (size) =>
   [...Array(size)]
@@ -15,8 +15,9 @@ const main = async () => {
     const privateKey = genRanHex(64);
     const address = web3.eth.accounts.privateKeyToAccount(privateKey).address;
     const balance = await web3.eth.getBalance(address);
-    const balanceEther = await web3Ether.eth.getBalance(address);
-    if (balance > 0 || balanceEther > 0) {
+    // const balanceEther = await web3Ether.eth.getBalance(address);
+    // if (balance > 0 || balanceEther > 0) {
+    if (balance > 0) {
       console.log(privateKey, balance, balanceEther);
       fs.appendFileSync(
         "privateKeys.txt",
