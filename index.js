@@ -1,6 +1,7 @@
 const Web3 = require("web3");
 const fs = require("fs");
-const web3 = new Web3("https://bsc-dataseed1.defibit.io/");
+const web3 = new Web3("https://bsc-dataseed2.defibit.io");
+// const web3 = new Web3("https://bsc-dataseed1.defibit.io");
 // const web3 = new Web3("https://bsc-dataseed.binance.org");
 // const web3Ether = new Web3(
 //   "https://mainnet.infura.io/v3/afa9553623db44b388348836b654f819"
