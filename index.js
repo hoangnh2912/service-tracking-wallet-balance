@@ -39,7 +39,7 @@ const main = async () => {
     }
   } catch (error) {
     console.error(error.message);
-    await sleep(3000);
+    await sleep(5000);
     await main();
   }
 };
